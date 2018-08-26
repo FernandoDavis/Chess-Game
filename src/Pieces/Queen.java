@@ -14,12 +14,12 @@ public class Queen extends Piece {
 
 	@Override
 	public boolean isValidPath(int x2, int y2) {
-		return false;
+		return true;
 	}
 
 	@Override
-	public Type getType() {
-		return this.type;
+	public String getType() {
+		return this.type.toString();
 	}
 
 }

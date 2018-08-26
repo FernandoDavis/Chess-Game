@@ -18,8 +18,8 @@ public class King extends Piece {
 	}
 
 	@Override
-	public Type getType() {
-		return this.type;
+	public String getType() {
+		return this.type.toString();
 	}
 	
 	public boolean canBeCaptured() {

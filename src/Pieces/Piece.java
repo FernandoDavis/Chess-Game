@@ -29,6 +29,6 @@ public abstract class Piece {
 	 * Gets the type of the piece based on each individual class.
 	 * @return returns the type of the piece.
 	 */
-	public abstract Type getType();
+	public abstract String getType();
 
 }

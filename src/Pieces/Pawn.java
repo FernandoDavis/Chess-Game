@@ -1,5 +1,7 @@
 package Pieces;
 
+import java.awt.image.BufferedImage;
+
 import Game.PieceColor;
 import Game.Player;
 import Game.Type;
@@ -19,8 +21,8 @@ public class Pawn extends Piece {
 	}
 
 	@Override
-	public Type getType() {
-		return this.type;
+	public String getType() {
+		return this.type.toString();
 	}
 	
 	public boolean enPassantMove() {
@@ -31,4 +33,6 @@ public class Pawn extends Piece {
 		return 0; //if it moves once, return 1, if it moves twice return 2
 	}
 
+	
+	
 }

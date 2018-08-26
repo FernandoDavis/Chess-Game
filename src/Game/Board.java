@@ -1,17 +1,27 @@
 package Game;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import GUI.ChessMouseListener;
+import Pieces.Bishop;
+import Pieces.GraphicsManager;
+import Pieces.King;
+import Pieces.Knight;
 import Pieces.Pawn;
 import Pieces.Piece;
+import Pieces.Queen;
+import Pieces.Rook;
 
-public class Board extends JPanel {
+public class Board extends JPanel{
 
 	private static final int GRID_X = 25;
 	private static final int GRID_Y = 25;
@@ -22,34 +32,64 @@ public class Board extends JPanel {
 	public int y = -1;
 	public int mouseDownGridX = 0;
 	public int mouseDownGridY = 0;
-
-	///////////////////////////// TEST////////////////////////////
-	public Grid[][] grid = new Grid[8][8];
+	
+	
+	/////////////////////////////TEST////////////////////////////
+	public Grid[][] board;
 	ArrayList<Piece> removedPieces;
+	GraphicsManager gm;
+	
+	public Board() {
 
-	Board() {
+		board = new Grid[8][8];
+		Color color = null;
+		gm = new GraphicsManager();
+		
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				grid[i][j] = new Grid();
+				if(i%2 == 1 && j%2 == 1 || i%2 == 0 && j%2 == 0)
+					color = Color.WHITE;
+				else
+					color = Color.LIGHT_GRAY;
+				board[i][j] = new Grid(color, gm);
 			}
 		}
 
 		for (int i = 0; i < 8; i++) {
-			grid[i][0].piece = new Pawn(i, 0);
-			grid[i][7].piece = new Pawn(i, 7);
+			board[i][1].piece = new Pawn(i, 1);
+			board[i][6].piece = new Pawn(i, 6);
 		}
 
+		//White
+		board[1][0].piece = new Knight(1, 0);
+		board[6][0].piece = new Knight(6, 0);
+		//Black
+		board[1][7].piece = new Knight(1, 7);
+		board[6][7].piece = new Knight(6, 7);
+		
+		//White
+		board[2][0].piece = new Bishop(2, 0);
+		board[5][0].piece = new Bishop(5, 0);
+		//Black
+		board[2][7].piece = new Bishop(2, 7);
+		board[5][7].piece = new Bishop(5, 7);
+		
+		//White
+		board[0][0].piece = new Rook(0, 0);
+		board[7][0].piece = new Rook(7, 0);
+		//Black
+		board[0][7].piece = new Rook(0, 7);
+		board[7][7].piece = new Rook(7, 7);
+		
+		//White
+		board[4][0].piece = new King(0, 4);
+		board[3][0].piece = new Queen(0, 3);
+		//Black
+		board[4][7].piece = new King(7, 4);
+		board[3][7].piece = new Queen(7, 3);
+		
 		removedPieces = new ArrayList<Piece>();
-
-		if (INNER_CELL_SIZE + (new Random()).nextInt(1) < 1) { // Use of "random" to prevent unwanted Eclipse warning
-			throw new RuntimeException("INNER_CELL_SIZE must be positive!");
-		}
-		if (TOTAL_COLUMNS + (new Random()).nextInt(1) < 2) { // Use of "random" to prevent unwanted Eclipse warning
-			throw new RuntimeException("TOTAL_COLUMNS must be at least 2!");
-		}
-		if (TOTAL_ROWS + (new Random()).nextInt(1) < 3) { // Use of "random" to prevent unwanted Eclipse warning
-			throw new RuntimeException("TOTAL_ROWS must be at least 3!");
-		}
+		addMouseListener(new ChessMouseListener());
 	}
 
 	public void movePiece(int xPiece, int yPiece, int xBoard, int yBoard) {
@@ -58,14 +98,10 @@ public class Board extends JPanel {
 		// Check if grid[xBoard, yBoard].piece != null and use removePiece(xBoard,
 		// yBoard)
 		
-		if(grid[xPiece][yPiece].piece.isValidPath(xBoard, yBoard)) {
-			grid[xBoard][yBoard].piece = grid[xPiece][yPiece].piece;
-			grid[xPiece][yPiece].piece = null;
+		if(board[xPiece][yPiece].piece.isValidPath(xBoard, yBoard)) {
+			board[xBoard][yBoard].piece = board[xPiece][yPiece].piece;
+			board[xPiece][yPiece].piece = null;
 		}
-	}
-
-	public void removePiece(int xPiece, int yPiece) {
-		// Set grid[xBoard, yBoard] to null
 	}
 
 	public boolean checkPromote(Piece piece) {
@@ -73,9 +109,7 @@ public class Board extends JPanel {
 		// to backrank then change piece to whatever type player chooses
 		return true;
 	}
-
-	///////////////////////////////////////////////////////////////
-
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
@@ -89,11 +123,10 @@ public class Board extends JPanel {
 		int height = y2 - y1;
 
 		// Paint the background
-		g.setColor(Color.LIGHT_GRAY);
+		g.setColor(Color.CYAN);
 		g.fillRect(x1, y1, width + 1, height + 1);
 
-		// Draw the grid minus the bottom row (which has only one cell)
-		// By default, the grid will be 10x10 (see above: TOTAL_COLUMNS and TOTAL_ROWS)
+		// Draw the grid
 		g.setColor(Color.BLACK);
 		for (int y = 0; y <= TOTAL_ROWS; y++) {
 			g.drawLine(x1 + GRID_X, y1 + GRID_Y + (y * (INNER_CELL_SIZE + 1)),
@@ -108,13 +141,13 @@ public class Board extends JPanel {
 		for (int x = 0; x < TOTAL_COLUMNS; x++) {
 			for (int y = 0; y < TOTAL_ROWS; y++) {
 				
-				Color c = Color.WHITE;
+				Color c = board[x][y].color;
 				g.setColor(c);
 				g.fillRect(x1 + GRID_X + (x * (INNER_CELL_SIZE + 1)) + 1, y1 + GRID_Y + (y * (INNER_CELL_SIZE + 1)) + 1,
 						INNER_CELL_SIZE, INNER_CELL_SIZE);
-				
-				System.out.println(grid[x][y].piece + " " + x + " "+ y);
-				grid[x][y].displayPiece(x + GRID_X + (x * (INNER_CELL_SIZE + 1)), y + GRID_Y + (y * (INNER_CELL_SIZE + 1)), g);
+				if(board[x][y].piece != null) {
+					board[x][y].displayPiece(x + GRID_X + (x * (INNER_CELL_SIZE)), y + GRID_Y + (y * (INNER_CELL_SIZE)), g);
+				}
 			}
 		}
 	}
@@ -137,7 +170,7 @@ public class Board extends JPanel {
 		}
 		x = x / (INNER_CELL_SIZE + 1);
 		y = y / (INNER_CELL_SIZE + 1);
-		if (x < 0 || x > TOTAL_COLUMNS - 1 || y < 0 || y > TOTAL_ROWS - 2) { // Outside the rest of the grid
+		if (x < 0 || x > TOTAL_COLUMNS-1|| y < 0 || y > TOTAL_ROWS-1) { // Outside the rest of the grid
 			return -1;
 		}
 		return x;
@@ -161,10 +194,7 @@ public class Board extends JPanel {
 		}
 		x = x / (INNER_CELL_SIZE + 1);
 		y = y / (INNER_CELL_SIZE + 1);
-		if (x == 0 && y == TOTAL_ROWS - 1) { // The lower left extra cell
-			return y;
-		}
-		if (x < 0 || x > TOTAL_COLUMNS - 1 || y < 0 || y > TOTAL_ROWS - 2) { // Outside the rest of the grid
+		if (x < 0 || x > TOTAL_COLUMNS-1 || y < 0 || y > TOTAL_ROWS-1) { // Outside the rest of the grid
 			return -1;
 		}
 		return y;
